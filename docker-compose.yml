@@ -1,15 +1,40 @@
-version: '3.1'
-services:
-  stats-server:
-    ports:
-      - "9090:9090"
+version: '3.8'
 
+services:
   stats-db:
     image: postgres:14-alpine
-
-  ewm-service:
+    container_name: postgres_explorewithme_stats_container
     ports:
-      - "8080:8080"
+      - "6541:5432"
+    volumes:
+      - /var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=explorewithme_stats
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
 
-  ewm-db:
-    image: postgres:14-alpine
+  stats-server:
+    build: stats-server
+    image: stats-server
+    container_name: stats_server_container
+    ports:
+      - "9090:9090"
+    depends_on:
+      - stats-db
+    environment:
+      - DB_NAME=explorewithme_stats
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - DB_HOST=stats-db
+      - DB_PORT=5432
+
+  stats-gateway:
+    build: stats-gateway
+    image: stats-gateway
+    container_name: stats_gateway_container
+    ports:
+      - "8081:8081"
+    depends_on:
+      - stats-server
+    environment:
+      - SERVER_URL=http://stats-server:9090
