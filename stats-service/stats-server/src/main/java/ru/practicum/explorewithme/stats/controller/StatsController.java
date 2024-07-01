@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.explorewithme.stats.dto.HitDto;
 import ru.practicum.explorewithme.stats.dto.StatsDto;
 import ru.practicum.explorewithme.stats.service.StatsService;
+import ru.practicum.explorewithme.stats.validation.StatsRequestValidation;
+
+import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,7 +19,7 @@ public class StatsController {
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
-    public HitDto saveHit(@RequestBody HitDto hitDto) {
+    public HitDto saveHit(@RequestBody @Valid HitDto hitDto) {
         log.info("Saving new hit={}", hitDto);
 
         return statsService.saveHit(hitDto);
@@ -27,6 +30,7 @@ public class StatsController {
                              @RequestParam String[] uris,
                              @RequestParam(required = false, defaultValue = "false") Boolean unique) {
         log.info("Getting stats for uris={}; from={}; to={}; unique = {}", uris, start, end, unique);
+        StatsRequestValidation.startEndValidate(start, end);
 
         return statsService.getStats(start, end, uris, unique);
     }
