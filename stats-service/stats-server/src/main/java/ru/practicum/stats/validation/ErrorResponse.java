@@ -1,4 +1,4 @@
-package ru.practicum.explorewithme.stats.validation;
+package ru.practicum.stats.validation;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

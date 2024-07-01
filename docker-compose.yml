@@ -5,7 +5,7 @@ services:
     image: postgres:14-alpine
     container_name: postgres_explorewithme_stats_container
     ports:
-      - "6541:5432"
+      - "6431:5432"
     volumes:
       - /var/lib/postgresql/data/
     environment:
@@ -27,14 +27,3 @@ services:
       - POSTGRES_PASSWORD=password
       - DB_HOST=stats-db
       - DB_PORT=5432
-
-  stats-gateway:
-    build: stats-gateway
-    image: stats-gateway
-    container_name: stats_gateway_container
-    ports:
-      - "8081:8081"
-    depends_on:
-      - stats-server
-    environment:
-      - SERVER_URL=http://stats-server:9090

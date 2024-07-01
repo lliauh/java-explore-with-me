@@ -1,22 +1,18 @@
-package ru.practicum.explorewithme.stats.model;
+package ru.practicum.stats.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "hits")
 @Data
-@RequiredArgsConstructor
 @AllArgsConstructor
-public class Hit {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+@NoArgsConstructor
+public class HitDto {
     private Long id;
 
     @NotBlank
@@ -29,5 +25,6 @@ public class Hit {
     private String ip;
 
     @NotNull
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;
 }

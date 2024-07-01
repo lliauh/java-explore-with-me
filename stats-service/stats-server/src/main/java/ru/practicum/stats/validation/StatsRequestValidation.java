@@ -1,4 +1,4 @@
-package ru.practicum.explorewithme.stats.validation;
+package ru.practicum.stats.validation;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;

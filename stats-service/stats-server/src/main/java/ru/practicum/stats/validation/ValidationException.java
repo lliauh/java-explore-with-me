@@ -1,4 +1,4 @@
-package ru.practicum.explorewithme.stats.validation;
+package ru.practicum.stats.validation;
 
 public class ValidationException extends RuntimeException {
     public ValidationException(final String message) {

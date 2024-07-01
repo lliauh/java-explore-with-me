@@ -1,12 +1,12 @@
-package ru.practicum.explorewithme.stats.service;
+package ru.practicum.stats.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.explorewithme.stats.dto.HitDto;
-import ru.practicum.explorewithme.stats.dto.StatsDto;
-import ru.practicum.explorewithme.stats.model.Hit;
-import ru.practicum.explorewithme.stats.model.HitMapper;
-import ru.practicum.explorewithme.stats.repository.HitRepository;
+import ru.practicum.stats.dto.HitDto;
+import ru.practicum.stats.dto.StatsDto;
+import ru.practicum.stats.model.Hit;
+import ru.practicum.stats.model.HitMapper;
+import ru.practicum.stats.repository.HitRepository;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;

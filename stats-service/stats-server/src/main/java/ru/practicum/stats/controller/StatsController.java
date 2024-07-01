@@ -1,13 +1,13 @@
-package ru.practicum.explorewithme.stats.controller;
+package ru.practicum.stats.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.explorewithme.stats.dto.HitDto;
-import ru.practicum.explorewithme.stats.dto.StatsDto;
-import ru.practicum.explorewithme.stats.service.StatsService;
-import ru.practicum.explorewithme.stats.validation.StatsRequestValidation;
+import ru.practicum.stats.dto.HitDto;
+import ru.practicum.stats.dto.StatsDto;
+import ru.practicum.stats.service.StatsService;
+import ru.practicum.stats.validation.StatsRequestValidation;
 
 import javax.validation.Valid;
 

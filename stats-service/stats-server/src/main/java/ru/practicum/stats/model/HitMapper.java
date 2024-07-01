@@ -1,6 +1,6 @@
-package ru.practicum.explorewithme.stats.model;
+package ru.practicum.stats.model;
 
-import ru.practicum.explorewithme.stats.dto.HitDto;
+import ru.practicum.stats.dto.HitDto;
 
 public class HitMapper {
     public static Hit toHit(HitDto hitDto) {
