@@ -16,6 +16,7 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>stats-service</module>
-	</modules>
+        <module>ewm-service</module>
+    </modules>
 
 </project>
