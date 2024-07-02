@@ -10,7 +10,8 @@
 
     <artifactId>stats-server</artifactId>
     <name>stats-server</name>
-
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -74,6 +75,7 @@
             <groupId>ru.practicum</groupId>
             <artifactId>stats-dto</artifactId>
             <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
     <build>
@@ -93,6 +95,14 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>10</source>
+                        <target>10</target>
+                    </configuration>
                 </plugin>
             </plugins>
     </build>
