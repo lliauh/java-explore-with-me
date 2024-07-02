@@ -10,7 +10,9 @@
 
     <artifactId>stats-dto</artifactId>
     <name>stats-dto</name>
-    <packaging>pom</packaging>
+    <properties>
+        <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
+    </properties>
 
     <dependencies>
         <dependency>

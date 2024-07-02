@@ -10,7 +10,9 @@
 
     <artifactId>stats-client</artifactId>
     <name>stats-client</name>
-    <packaging>pom</packaging>
+    <properties>
+        <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
+    </properties>
 
     <dependencies>
         <dependency>
