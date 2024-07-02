@@ -12,6 +12,10 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +34,21 @@ public class StatsServiceImpl implements StatsService {
         LocalDateTime decodedStart = decodeDateFromParam(start);
         LocalDateTime decodedEnd = decodeDateFromParam(end);
 
+        if (uris == null) {
+            List<StatsDto> allStats;
+
+            if (unique) {
+                allStats = hitRepository.getAllStatsUnique(decodedStart, decodedEnd);
+            } else {
+                allStats = hitRepository.getAllStats(decodedStart, decodedEnd);
+            }
+
+            StatsDto[] statsArray = new StatsDto[allStats.size()];
+            allStats.toArray(statsArray);
+
+            return statsArray;
+        }
+
         StatsDto[] stats = new StatsDto[uris.length];
 
         for (int i = 0; i < uris.length; i++) {
@@ -39,6 +58,8 @@ public class StatsServiceImpl implements StatsService {
                 stats[i] = hitRepository.getStatsByUri(uris[i], decodedStart, decodedEnd);
             }
         }
+
+        Arrays.sort(stats, Collections.reverseOrder(Comparator.comparing(StatsDto::getHits)));
 
         return stats;
     }

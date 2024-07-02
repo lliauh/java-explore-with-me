@@ -27,7 +27,7 @@ public class StatsController {
 
     @GetMapping("/stats")
     public StatsDto[] getStats(@RequestParam String start, @RequestParam String end,
-                             @RequestParam String[] uris,
+                             @RequestParam(required = false) String[] uris,
                              @RequestParam(required = false, defaultValue = "false") Boolean unique) {
         log.info("Getting stats for uris={}; from={}; to={}; unique = {}", uris, start, end, unique);
         StatsRequestValidation.startEndValidate(start, end);
