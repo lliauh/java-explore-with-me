@@ -73,7 +73,6 @@
         </dependency>
     </dependencies>
     <build>
-        <pluginManagement>
             <plugins>
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
@@ -83,8 +82,14 @@
                         <mainClass>ru.practicum.ewm.EwmServiceApp</mainClass>
                         <layout>JAR</layout>
                     </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>repackage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
-        </pluginManagement>
     </build>
 </project>
