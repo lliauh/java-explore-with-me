@@ -28,12 +28,17 @@ public class StatsClient extends BaseClient {
 
     public ResponseEntity<Object> getStats(String start, String end, String[] uris, Boolean unique) {
         String pathFirstPart = "/stats?start=" + start + "&end=" + end;
-        String pathWithUris = new String();
-        for (int i = 0; i < uris.length; i++) {
-            pathWithUris = pathFirstPart + "&uris=" + uris[i];
-        }
+        String finalPath;
 
-        String finalPath = pathWithUris + "&unique=" + unique;
+        if (uris != null) {
+            String pathWithUris = new String();
+            for (int i = 0; i < uris.length; i++) {
+                pathWithUris = pathFirstPart + "&uris=" + uris[i];
+            }
+            finalPath = pathWithUris + "&unique=" + unique;
+        } else {
+            finalPath = pathFirstPart + "&unique=" + unique;
+        }
 
         return get(finalPath);
     }
