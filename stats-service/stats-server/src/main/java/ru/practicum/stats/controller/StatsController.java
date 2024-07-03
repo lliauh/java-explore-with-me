@@ -2,14 +2,17 @@ package ru.practicum.stats.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.stats.dto.HitDto;
 import ru.practicum.stats.dto.StatsDto;
 import ru.practicum.stats.service.StatsService;
-import ru.practicum.stats.validation.StatsRequestValidation;
+import ru.practicum.stats.validation.ValidationException;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,11 +29,15 @@ public class StatsController {
     }
 
     @GetMapping("/stats")
-    public StatsDto[] getStats(@RequestParam String start, @RequestParam String end,
-                             @RequestParam(required = false) String[] uris,
-                             @RequestParam(required = false, defaultValue = "false") Boolean unique) {
+    public List<StatsDto> getStats(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
+                                   @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
+                                   @RequestParam(required = false) String[] uris,
+                                   @RequestParam(required = false, defaultValue = "false") Boolean unique) {
         log.info("Getting stats for uris={}; from={}; to={}; unique = {}", uris, start, end, unique);
-        StatsRequestValidation.startEndValidate(start, end);
+
+        if (start.isAfter(end)) {
+            throw new ValidationException("End time should be greater than start time.");
+        }
 
         return statsService.getStats(start, end, uris, unique);
     }

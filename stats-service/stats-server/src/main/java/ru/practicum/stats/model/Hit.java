@@ -2,7 +2,6 @@ package ru.practicum.stats.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -12,7 +11,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "hits")
 @Data
-@RequiredArgsConstructor
 @AllArgsConstructor
 public class Hit {
     @Id

@@ -9,7 +9,7 @@ import ru.practicum.stats.model.Hit;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface HitRepository extends JpaRepository<Hit, Integer> {
+public interface HitRepository extends JpaRepository<Hit, Long> {
     @Query("select new ru.practicum.stats.dto.StatsDto(h.app, h.uri, count(h.id)) " +
             "from Hit as h " +
             "where h.uri = :uri and h.timestamp between :start and :end " +

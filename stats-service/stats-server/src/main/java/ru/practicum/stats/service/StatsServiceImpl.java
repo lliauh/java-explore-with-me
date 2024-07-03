@@ -8,11 +8,8 @@ import ru.practicum.stats.model.Hit;
 import ru.practicum.stats.model.HitMapper;
 import ru.practicum.stats.repository.HitRepository;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -30,42 +27,31 @@ public class StatsServiceImpl implements StatsService {
     }
 
     @Override
-    public StatsDto[] getStats(String start, String end, String[] uris, Boolean unique) {
-        LocalDateTime decodedStart = decodeDateFromParam(start);
-        LocalDateTime decodedEnd = decodeDateFromParam(end);
-
+    public List<StatsDto> getStats(LocalDateTime start, LocalDateTime end, String[] uris, Boolean unique) {
         if (uris == null) {
             List<StatsDto> allStats;
 
             if (unique) {
-                allStats = hitRepository.getAllStatsUnique(decodedStart, decodedEnd);
+                allStats = hitRepository.getAllStatsUnique(start, end);
             } else {
-                allStats = hitRepository.getAllStats(decodedStart, decodedEnd);
+                allStats = hitRepository.getAllStats(start, end);
             }
 
-            StatsDto[] statsArray = new StatsDto[allStats.size()];
-            allStats.toArray(statsArray);
-
-            return statsArray;
+            return allStats;
         }
 
-        StatsDto[] stats = new StatsDto[uris.length];
+        List<StatsDto> stats = new ArrayList<>();
 
-        for (int i = 0; i < uris.length; i++) {
+        for (String uri : uris) {
             if (unique) {
-                stats[i] = hitRepository.getStatsByUriUnique(uris[i], decodedStart, decodedEnd);
+                stats.add(hitRepository.getStatsByUriUnique(uri, start, end));
             } else {
-                stats[i] = hitRepository.getStatsByUri(uris[i], decodedStart, decodedEnd);
+                stats.add(hitRepository.getStatsByUri(uri, start, end));
             }
         }
 
-        Arrays.sort(stats, Collections.reverseOrder(Comparator.comparing(StatsDto::getHits)));
+        stats.sort(Collections.reverseOrder(Comparator.comparing(StatsDto::getHits)));
 
         return stats;
-    }
-
-    private LocalDateTime decodeDateFromParam(String date) {
-        return LocalDateTime.parse(URLDecoder.decode(date, StandardCharsets.UTF_8),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 }
