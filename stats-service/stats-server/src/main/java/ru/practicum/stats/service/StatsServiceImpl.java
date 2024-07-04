@@ -27,14 +27,14 @@ public class StatsServiceImpl implements StatsService {
     }
 
     @Override
-    public List<StatsDto> getStats(LocalDateTime start, LocalDateTime end, String[] uris, Boolean unique) {
+    public List<StatsDto> getStats(LocalDateTime startDate, LocalDateTime endDate, String[] uris, Boolean unique) {
         if (uris == null) {
             List<StatsDto> allStats;
 
             if (unique) {
-                allStats = hitRepository.getAllStatsUnique(start, end);
+                allStats = hitRepository.getAllStatsUnique(startDate, endDate);
             } else {
-                allStats = hitRepository.getAllStats(start, end);
+                allStats = hitRepository.getAllStats(startDate, endDate);
             }
 
             return allStats;
@@ -44,9 +44,9 @@ public class StatsServiceImpl implements StatsService {
 
         for (String uri : uris) {
             if (unique) {
-                stats.add(hitRepository.getStatsByUriUnique(uri, start, end));
+                stats.add(hitRepository.getStatsByUriUnique(uri, startDate, endDate));
             } else {
-                stats.add(hitRepository.getStatsByUri(uri, start, end));
+                stats.add(hitRepository.getStatsByUri(uri, startDate, endDate));
             }
         }
 

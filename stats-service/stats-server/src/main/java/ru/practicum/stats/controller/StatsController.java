@@ -29,16 +29,16 @@ public class StatsController {
     }
 
     @GetMapping("/stats")
-    public List<StatsDto> getStats(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
-                                   @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
+    public List<StatsDto> getStats(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startDate,
+                                   @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endDate,
                                    @RequestParam(required = false) String[] uris,
                                    @RequestParam(required = false, defaultValue = "false") Boolean unique) {
-        log.info("Getting stats for uris={}; from={}; to={}; unique = {}", uris, start, end, unique);
+        log.info("Getting stats for uris={}; from={}; to={}; unique = {}", uris, startDate, endDate, unique);
 
-        if (start.isAfter(end)) {
+        if (startDate.isAfter(endDate)) {
             throw new ValidationException("End time should be greater than start time.");
         }
 
-        return statsService.getStats(start, end, uris, unique);
+        return statsService.getStats(startDate, endDate, uris, unique);
     }
 }
