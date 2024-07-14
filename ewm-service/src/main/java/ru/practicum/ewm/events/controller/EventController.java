@@ -92,12 +92,15 @@ public class EventController {
                                          @RequestParam(defaultValue = "false") Boolean onlyAvailable,
                                          @RequestParam(defaultValue = "VIEWS") SortType sort,
                                          @RequestParam(required = false, defaultValue = "0") Integer from,
-                                         @RequestParam(required = false, defaultValue = "10") Integer size) {
+                                         @RequestParam(required = false, defaultValue = "10") Integer size,
+                                         HttpServletRequest request) {
         log.info("Getting events by conditions: text={}, categories={}, paid={}, rangeStart={}, rangeEnd={}, " +
-                        "onlyAvailable={}, sort={}, page starts from={}, size={}", text, categories, paid, rangeStart,
-                rangeEnd, onlyAvailable, sort, from, size);
+                        "onlyAvailable={}, sort={}, page starts from={}, size={}, client ip: {}, endpoint path: {}",
+                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, request.getRemoteAddr(),
+                request.getRequestURI());
 
-        return eventService.getEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
+        return eventService.getEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size,
+                request.getRemoteAddr(), request.getRequestURI());
     }
 
     @GetMapping("/events/{eventId}")

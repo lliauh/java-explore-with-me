@@ -8,7 +8,6 @@ import ru.practicum.stats.model.Hit;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 public interface HitRepository extends JpaRepository<Hit, Long> {
     @Query("select new ru.practicum.stats.dto.StatsDto(h.app, h.uri, count(h.id)) " +
@@ -37,7 +36,4 @@ public interface HitRepository extends JpaRepository<Hit, Long> {
             "group by h.app, h.uri order by count(distinct h.ip)")
     List<StatsDto> getAllStatsUnique(@Param("start") LocalDateTime startDate, @Param("end") LocalDateTime endDate);
 
-    @Query(value = "select * from hits as h where h.ip = :ip and h.uri = :uri and h.app = :app limit 1",
-            nativeQuery = true)
-    Optional<Hit> getHitByIp(@Param("ip") String ip, @Param("uri") String uri, @Param("app") String app);
 }

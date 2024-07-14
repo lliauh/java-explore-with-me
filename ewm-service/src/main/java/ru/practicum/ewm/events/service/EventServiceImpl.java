@@ -265,7 +265,8 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> getEvents(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
                                          LocalDateTime rangeEnd, Boolean onlyAvailable, SortType sort, Integer from,
-                                         Integer size) {
+                                         Integer size, String clientIp, String uri) {
+        saveHit(clientIp, uri);
         PageRequest pageRequest = PageRequest.of(from / size, size);
 
         if (rangeStart == null) {
@@ -318,14 +319,13 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getEventById(Long eventId, String clientIp, String uri) {
+        saveHit(clientIp, uri);
         checkIfEventExists(eventId);
 
         Event event = eventRepository.getReferenceById(eventId);
         checkIfEventIsPublished(event);
 
         EventFullDto result = EventMapper.toEventFullDto(event);
-
-        saveHit(clientIp, uri);
 
         result.setConfirmedRequests(requestService.getConfirmedRequestsByEventId(eventId));
         result.setViews(getViewsByEventId(eventId));
@@ -355,7 +355,7 @@ public class EventServiceImpl implements EventService {
         String uri = "/events/" + eventId;
         String[] uris = {uri};
 
-        List<StatsDto> stats = statsClient.getStats(startDate, endDate, uris, false);
+        List<StatsDto> stats = statsClient.getStats(startDate, endDate, uris, true);
 
         if (stats.isEmpty()) {
             return 0L;

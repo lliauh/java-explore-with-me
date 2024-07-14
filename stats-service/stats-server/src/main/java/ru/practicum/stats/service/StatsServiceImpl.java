@@ -18,12 +18,6 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public HitDto saveHit(HitDto hitDto) {
-        Optional<Hit> savedHit = hitRepository.getHitByIp(hitDto.getIp(), hitDto.getUri(), hitDto.getApp());
-
-        if (savedHit.isPresent()) {
-            return HitMapper.toHitDto(savedHit.get());
-        }
-
         Hit hit = HitMapper.toHit(hitDto);
 
         return HitMapper.toHitDto(hitRepository.save(hit));

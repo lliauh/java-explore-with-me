@@ -23,8 +23,8 @@ public interface EventService {
     EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest updateRequest);
 
     List<EventShortDto> getEvents(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
-                                  LocalDateTime rangeEnd, Boolean onlyAvailable, SortType sort, Integer from, Integer
-                                          size);
+                                  LocalDateTime rangeEnd, Boolean onlyAvailable, SortType sort, Integer from,
+                                  Integer size, String clientIp, String uri);
 
     EventFullDto getEventById(Long eventId, String clientIp, String uri);
 
