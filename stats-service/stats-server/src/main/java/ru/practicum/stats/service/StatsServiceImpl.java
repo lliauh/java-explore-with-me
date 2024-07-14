@@ -9,10 +9,7 @@ import ru.practicum.stats.model.HitMapper;
 import ru.practicum.stats.repository.HitRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +18,12 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public HitDto saveHit(HitDto hitDto) {
+        Optional<Hit> savedHit = hitRepository.getHitByIp(hitDto.getIp(), hitDto.getUri(), hitDto.getApp());
+
+        if (savedHit.isPresent()) {
+            return HitMapper.toHitDto(savedHit.get());
+        }
+
         Hit hit = HitMapper.toHit(hitDto);
 
         return HitMapper.toHitDto(hitRepository.save(hit));
