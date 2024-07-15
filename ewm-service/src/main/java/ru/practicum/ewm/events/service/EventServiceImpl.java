@@ -1,6 +1,7 @@
 package ru.practicum.ewm.events.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.categories.repository.CategoryRepository;
@@ -23,10 +24,7 @@ import ru.practicum.stats.dto.StatsDto;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,22 +40,41 @@ public class EventServiceImpl implements EventService {
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    @Value("${app.name}")
+    private String app;
+
     @Override
     public List<EventShortDto> getUsersEvents(Long userId, Integer from, Integer size) {
         userService.checkIfUserExists(userId);
 
         PageRequest pageRequest = PageRequest.of(from / size, size);
 
-        List<EventShortDto> result = eventRepository.getAllUserEvents(userId, pageRequest).stream()
+        List<EventShortDto> foundEvents = eventRepository.getAllUserEvents(userId, pageRequest).stream()
                 .map(EventMapper::toEventShortDto)
                 .collect(Collectors.toList());
 
-        for (EventShortDto event : result) {
-            event.setViews(getViewsByEventId(event.getId()));
-            event.setConfirmedRequests(requestService.getConfirmedRequestsByEventId(event.getId()));
+        List<Long> foundEventsIds = foundEvents.stream()
+                .map(EventShortDto::getId)
+                .collect(Collectors.toList());
+        Map<Long, Long> confirmedRequestsMap = requestService.getConfirmedRequestsByEventsList(foundEventsIds);
+        Map<Long, Long> eventsViews = getViewsByEventsIds(foundEventsIds);
+
+
+        for (EventShortDto event : foundEvents) {
+            if (eventsViews != null && eventsViews.containsKey(event.getId())) {
+                event.setViews(eventsViews.get(event.getId()));
+            } else {
+                event.setViews(0L);
+            }
+
+            if (confirmedRequestsMap != null && confirmedRequestsMap.containsKey(event.getId())) {
+                event.setConfirmedRequests(confirmedRequestsMap.get(event.getId()));
+            } else {
+                event.setConfirmedRequests(0L);
+            }
         }
 
-        return result;
+        return foundEvents;
     }
 
     @Override
@@ -105,40 +122,7 @@ public class EventServiceImpl implements EventService {
 
         checkIfUserIsInitiator(userId, event);
 
-        if (updateRequest.getDescription() != null) {
-            event.setDescription(updateRequest.getDescription());
-        }
-
-        if (updateRequest.getCategory() != null) {
-            categoryService.checkIfCategoryExists(updateRequest.getCategory());
-            event.setCategory(categoryRepository.getReferenceById(updateRequest.getCategory()));
-        }
-
-        if (updateRequest.getEventDate() != null) {
-            checkIfEventDateIsValid(updateRequest.getEventDate());
-            event.setEventDate(updateRequest.getEventDate());
-        }
-
-        if (updateRequest.getLocation() != null) {
-            event.setLat(updateRequest.getLocation().getLat());
-            event.setLon(updateRequest.getLocation().getLon());
-        }
-
-        if (updateRequest.getPaid() != null) {
-            event.setPaid(updateRequest.getPaid());
-        }
-
-        if (updateRequest.getParticipantLimit() != null) {
-            event.setParticipantLimit(updateRequest.getParticipantLimit());
-        }
-
-        if (updateRequest.getRequestModeration() != null) {
-            event.setRequestModeration(updateRequest.getRequestModeration());
-        }
-
-        if (updateRequest.getTitle() != null) {
-            event.setTitle(updateRequest.getTitle());
-        }
+        updateEventFields(updateRequest, event);
 
         if (updateRequest.getStateAction() != null) {
             if (updateRequest.getStateAction().equals(UpdateEventUserStateAction.CANCEL_REVIEW)) {
@@ -175,11 +159,28 @@ public class EventServiceImpl implements EventService {
         List<Event> foundEvents = eventRepository.getEventsByAdmin(users, states, categories, rangeStart, rangeEnd,
                 pageRequest);
 
+        List<Long> foundEventsIds = foundEvents.stream()
+                .map(Event::getId)
+                .collect(Collectors.toList());
+        Map<Long, Long> confirmedRequestsMap = requestService.getConfirmedRequestsByEventsList(foundEventsIds);
+        Map<Long, Long> eventsViews = getViewsByEventsIds(foundEventsIds);
+
         List<EventFullDto> result = new ArrayList<>();
         for (Event event : foundEvents) {
             EventFullDto eventFullDto = EventMapper.toEventFullDto(event);
-            eventFullDto.setViews(getViewsByEventId(event.getId()));
-            eventFullDto.setConfirmedRequests(requestService.getConfirmedRequestsByEventId(event.getId()));
+
+            if (eventsViews != null && eventsViews.containsKey(event.getId())) {
+                eventFullDto.setViews(eventsViews.get(event.getId()));
+            } else {
+                eventFullDto.setViews(0L);
+            }
+
+            if (confirmedRequestsMap != null && confirmedRequestsMap.containsKey(event.getId())) {
+                eventFullDto.setConfirmedRequests(confirmedRequestsMap.get(event.getId()));
+            } else {
+                eventFullDto.setConfirmedRequests(0L);
+            }
+
             result.add(eventFullDto);
         }
 
@@ -192,44 +193,7 @@ public class EventServiceImpl implements EventService {
 
         Event event = eventRepository.getReferenceById(eventId);
 
-        if (updateRequest.getAnnotation() != null) {
-            event.setAnnotation(updateRequest.getAnnotation());
-        }
-
-        if (updateRequest.getDescription() != null) {
-            event.setDescription(updateRequest.getDescription());
-        }
-
-        if (updateRequest.getCategory() != null) {
-            categoryService.checkIfCategoryExists(updateRequest.getCategory());
-            event.setCategory(categoryRepository.getReferenceById(updateRequest.getCategory()));
-        }
-
-        if (updateRequest.getEventDate() != null) {
-            checkIfEventDateIsValid(updateRequest.getEventDate());
-            event.setEventDate(updateRequest.getEventDate());
-        }
-
-        if (updateRequest.getLocation() != null) {
-            event.setLat(updateRequest.getLocation().getLat());
-            event.setLon(updateRequest.getLocation().getLon());
-        }
-
-        if (updateRequest.getPaid() != null) {
-            event.setPaid(updateRequest.getPaid());
-        }
-
-        if (updateRequest.getParticipantLimit() != null) {
-            event.setParticipantLimit(updateRequest.getParticipantLimit());
-        }
-
-        if (updateRequest.getRequestModeration() != null) {
-            event.setRequestModeration(updateRequest.getRequestModeration());
-        }
-
-        if (updateRequest.getTitle() != null) {
-            event.setTitle(updateRequest.getTitle());
-        }
+        updateEventFields(updateRequest, event);
 
         if (updateRequest.getStateAction() != null) {
             if (updateRequest.getStateAction().equals(UpdateEventAdminStateAction.PUBLISH_EVENT)) {
@@ -282,18 +246,32 @@ public class EventServiceImpl implements EventService {
         List<Event> foundEvents = eventRepository.getEventsByUser(text, categories, paid, rangeStart, rangeEnd,
                 pageRequest);
 
+        List<Long> foundEventsIds = foundEvents.stream()
+                .map(Event::getId)
+                .collect(Collectors.toList());
+        Map<Long, Long> confirmedRequestsMap = requestService.getConfirmedRequestsByEventsList(foundEventsIds);
+        Map<Long, Long> eventsViews = getViewsByEventsIds(foundEventsIds);
+
         List<EventShortDto> result = new ArrayList<>();
 
         if (onlyAvailable) {
             for (Event event : foundEvents) {
                 if (!(event.getParticipantLimit() > 0 &&
                         event.getParticipantLimit().equals(
-                                requestService.getConfirmedRequestsByEventId(event.getId())))) {
+                                confirmedRequestsMap.get(event.getId())))) {
                     EventShortDto eventShortDto = EventMapper.toEventShortDto(event);
 
-                    eventShortDto.setViews(getViewsByEventId(event.getId()));
-                    eventShortDto.setConfirmedRequests(requestService.getConfirmedRequestsByEventId(event.getId()));
+                    if (eventsViews != null && eventsViews.containsKey(event.getId())) {
+                        eventShortDto.setViews(eventsViews.get(event.getId()));
+                    } else {
+                        eventShortDto.setViews(0L);
+                    }
 
+                    if (confirmedRequestsMap != null && confirmedRequestsMap.containsKey(event.getId())) {
+                        eventShortDto.setConfirmedRequests(confirmedRequestsMap.get(event.getId()));
+                    } else {
+                        eventShortDto.setConfirmedRequests(0L);
+                    }
 
                     result.add(eventShortDto);
                 }
@@ -301,8 +279,18 @@ public class EventServiceImpl implements EventService {
         } else {
             for (Event event : foundEvents) {
                 EventShortDto eventShortDto = EventMapper.toEventShortDto(event);
-                eventShortDto.setViews(getViewsByEventId(event.getId()));
-                eventShortDto.setConfirmedRequests(requestService.getConfirmedRequestsByEventId(event.getId()));
+
+                if (eventsViews != null && eventsViews.containsKey(event.getId())) {
+                    eventShortDto.setViews(eventsViews.get(event.getId()));
+                } else {
+                    eventShortDto.setViews(0L);
+                }
+
+                if (confirmedRequestsMap != null && confirmedRequestsMap.containsKey(event.getId())) {
+                    eventShortDto.setConfirmedRequests(confirmedRequestsMap.get(event.getId()));
+                } else {
+                    eventShortDto.setConfirmedRequests(0L);
+                }
 
                 result.add(eventShortDto);
             }
@@ -349,8 +337,13 @@ public class EventServiceImpl implements EventService {
     }
 
     private Long getViewsByEventId(Long eventId) {
-        String startDate = eventRepository.getReferenceById(eventId).getCreatedOn()
-                .format(formatter);
+        Event event = eventRepository.getReferenceById(eventId);
+
+        if (event.getPublishedOn() == null) {
+            return null;
+        }
+
+        String startDate = event.getPublishedOn().format(formatter);
         String endDate = LocalDateTime.now().format(formatter);
         String uri = "/events/" + eventId;
         String[] uris = {uri};
@@ -362,6 +355,43 @@ public class EventServiceImpl implements EventService {
         } else {
             return stats.get(0).getHits();
         }
+    }
+
+    private Map<Long, Long> getViewsByEventsIds(List<Long> eventIds) {
+        List<Event> events = eventRepository.getEventsByEventsIds(eventIds);
+        String[] uris = new String[events.size()];
+        LocalDateTime minPublishedDate = null;
+
+        for (int i = 0; i < events.size(); i++) {
+            if (events.get(i).getPublishedOn() != null && minPublishedDate == null) {
+                minPublishedDate = events.get(i).getPublishedOn();
+            } else if (events.get(i).getPublishedOn() != null && events.get(i).getPublishedOn()
+                    .isBefore(minPublishedDate)) {
+                minPublishedDate = events.get(i).getPublishedOn();
+            }
+            uris[i] = "/events/" + events.get(i).getId();
+        }
+
+        if (minPublishedDate == null) {
+            return null;
+        }
+
+        String startDate = minPublishedDate.format(formatter);
+        String endDate = LocalDateTime.now().format(formatter);
+
+        List<StatsDto> stats = statsClient.getStats(startDate, endDate, uris, true);
+
+        if (stats.isEmpty()) {
+            return null;
+        }
+
+        Map<Long, Long> eventsViews = new HashMap<>();
+
+        for (StatsDto stat : stats) {
+            eventsViews.put(Long.valueOf(stat.getUri().replace("/events/", "")), stat.getHits());
+        }
+
+        return eventsViews;
     }
 
     private void checkIfEventDateIsValid(LocalDateTime eventDate) {
@@ -392,7 +422,7 @@ public class EventServiceImpl implements EventService {
 
     private void saveHit(String clientIp, String uri) {
         HitDto hit = new HitDto();
-        hit.setApp("/ewm");
+        hit.setApp(app);
         hit.setUri(uri);
         hit.setIp(clientIp);
         hit.setTimestamp(LocalDateTime.now());
@@ -403,6 +433,47 @@ public class EventServiceImpl implements EventService {
     private void rangeValidation(LocalDateTime rangeStart, LocalDateTime rangeEnd) {
         if (rangeEnd.isBefore(rangeStart)) {
             throw new DateValidationException("Start date cannot be before end date.");
+        }
+    }
+
+    private void updateEventFields(UpdateEventRequest updateRequest, Event event) {
+        if (updateRequest.getAnnotation() != null && !updateRequest.getAnnotation().isBlank()) {
+            event.setAnnotation(updateRequest.getAnnotation());
+        }
+
+        if (updateRequest.getDescription() != null && !updateRequest.getDescription().isBlank()) {
+            event.setDescription(updateRequest.getDescription());
+        }
+
+        if (updateRequest.getCategory() != null) {
+            categoryService.checkIfCategoryExists(updateRequest.getCategory());
+            event.setCategory(categoryRepository.getReferenceById(updateRequest.getCategory()));
+        }
+
+        if (updateRequest.getEventDate() != null) {
+            checkIfEventDateIsValid(updateRequest.getEventDate());
+            event.setEventDate(updateRequest.getEventDate());
+        }
+
+        if (updateRequest.getLocation() != null) {
+            event.setLat(updateRequest.getLocation().getLat());
+            event.setLon(updateRequest.getLocation().getLon());
+        }
+
+        if (updateRequest.getPaid() != null) {
+            event.setPaid(updateRequest.getPaid());
+        }
+
+        if (updateRequest.getParticipantLimit() != null) {
+            event.setParticipantLimit(updateRequest.getParticipantLimit());
+        }
+
+        if (updateRequest.getRequestModeration() != null) {
+            event.setRequestModeration(updateRequest.getRequestModeration());
+        }
+
+        if (updateRequest.getTitle() != null && !updateRequest.getTitle().isBlank()) {
+            event.setTitle(updateRequest.getTitle());
         }
     }
 }

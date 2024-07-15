@@ -5,6 +5,9 @@ import lombok.NoArgsConstructor;
 import ru.practicum.ewm.categories.dto.CategoryDto;
 import ru.practicum.ewm.events.model.EventState;
 import ru.practicum.ewm.users.dto.UserShortDto;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -13,11 +16,13 @@ public class EventFullDto {
 
     private CategoryDto category;
 
-    private String createdOn;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createdOn;
 
     private String description;
 
-    private String eventDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime eventDate;
 
     private Long id;
 
@@ -27,9 +32,10 @@ public class EventFullDto {
 
     private Boolean paid;
 
-    private Integer participantLimit;
+    private Long participantLimit;
 
-    private String publishedOn;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime publishedOn;
 
     private Boolean requestModeration;
 
@@ -39,5 +45,5 @@ public class EventFullDto {
 
     private Long views;
 
-    private Integer confirmedRequests;
+    private Long confirmedRequests;
 }

@@ -5,6 +5,7 @@ import ru.practicum.ewm.requests.dto.EventRequestStatusUpdateResult;
 import ru.practicum.ewm.requests.dto.ParticipationRequestDto;
 
 import java.util.List;
+import java.util.Map;
 
 public interface RequestService {
     List<ParticipationRequestDto> getUsersRequests(Long userId);
@@ -18,5 +19,7 @@ public interface RequestService {
     EventRequestStatusUpdateResult updateRequests(Long userId, Long eventId,
                                                   EventRequestStatusUpdateRequest updatedRequestStatus);
 
-    Integer getConfirmedRequestsByEventId(Long eventId);
+    Long getConfirmedRequestsByEventId(Long eventId);
+
+    Map<Long, Long> getConfirmedRequestsByEventsList(List<Long> eventsIds);
 }

@@ -34,15 +34,6 @@ public class CompilationServiceImpl implements CompilationService {
 
         List<Compilation> compilations = compilationRepository.getAllCompilations(pinned, pageRequest);
 
-        /*
-        if (pinned) {
-            compilations = compilationRepository.getAllPinnedCompilations(pageRequest);
-        } else {
-            compilations = compilationRepository.getAllNonpinnedCompilations(pageRequest);
-        }
-
-         */
-
         List<CompilationDto> compilationsDto = new ArrayList<>();
 
         for (Compilation compilation : compilations)  {
@@ -136,10 +127,10 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     private void addEventsToDto(Compilation compilation, CompilationDto compilationDto) {
-        List<EventShortDto> eventShortDtoList = new ArrayList<>();
+        Set<EventShortDto> eventShortDtoSet = new HashSet<>();
         for (Event event : compilation.getEvents()) {
-            eventShortDtoList.add(EventMapper.toEventShortDto(event));
+            eventShortDtoSet.add(EventMapper.toEventShortDto(event));
         }
-        compilationDto.setEvents(eventShortDtoList);
+        compilationDto.setEvents(eventShortDtoSet);
     }
 }

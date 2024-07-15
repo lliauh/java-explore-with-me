@@ -7,10 +7,10 @@ public enum EventState {
     PUBLISHED,
     CANCELED;
 
-    public static void checkEventState(String state) {
+    public static EventState checkEventState(String state) {
         for (EventState enumState : EventState.values()) {
-            if (enumState.name().equals(state)) {
-                return;
+            if (enumState.name().equalsIgnoreCase(state)) {
+                return enumState;
             }
         }
 

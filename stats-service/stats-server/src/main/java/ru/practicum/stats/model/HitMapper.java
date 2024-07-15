@@ -1,7 +1,10 @@
 package ru.practicum.stats.model;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import ru.practicum.stats.dto.HitDto;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class HitMapper {
     public static Hit toHit(HitDto hitDto) {
         Hit hit = new Hit();

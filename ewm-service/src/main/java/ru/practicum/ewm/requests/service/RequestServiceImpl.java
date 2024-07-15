@@ -9,10 +9,7 @@ import ru.practicum.ewm.events.repository.EventRepository;
 import ru.practicum.ewm.events.service.EventService;
 import ru.practicum.ewm.exception.ActionValidationException;
 import ru.practicum.ewm.exception.NotFoundException;
-import ru.practicum.ewm.requests.dto.EventRequestStatusUpdateRequest;
-import ru.practicum.ewm.requests.dto.EventRequestStatusUpdateResult;
-import ru.practicum.ewm.requests.dto.ParticipationRequestDto;
-import ru.practicum.ewm.requests.dto.RequestMapper;
+import ru.practicum.ewm.requests.dto.*;
 import ru.practicum.ewm.requests.model.Request;
 import ru.practicum.ewm.requests.model.RequestStatus;
 import ru.practicum.ewm.requests.repository.RequestRepository;
@@ -22,6 +19,7 @@ import ru.practicum.ewm.users.service.UserService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -43,7 +41,6 @@ public class RequestServiceImpl implements RequestService {
         this.eventService = eventService;
         this.eventRepository = eventRepository;
     }
-
 
     @Override
     public List<ParticipationRequestDto> getUsersRequests(Long userId) {
@@ -124,31 +121,31 @@ public class RequestServiceImpl implements RequestService {
         Event event = eventRepository.getReferenceById(eventId);
         eventService.checkIfUserIsInitiator(userId, event);
 
-        for (Long requestId : updatedRequestStatus.getRequestIds()) {
-            checkIfRequestExists(requestId);
-            Request requestToStatusChange = requestRepository.getReferenceById(requestId);
+        List<Request> requestsToStatusChange = requestRepository.getAllRequestsByIds(updatedRequestStatus
+                .getRequestIds());
 
-            if (!requestToStatusChange.getStatus().equals(RequestStatus.PENDING)) {
+        for (Request request : requestsToStatusChange) {
+            if (!request.getStatus().equals(RequestStatus.PENDING)) {
                 throw new ActionValidationException("Only requests with status PENDING can be moderated");
             }
 
             if (!hasEventAvailableSlots(event)) {
                 throw new ActionValidationException("Participant limit was reached");
             } else {
-                requestToStatusChange.setStatus(RequestStatus.valueOf(updatedRequestStatus.getStatus().toString()));
-                requestRepository.save(requestToStatusChange);
+                request.setStatus(RequestStatus.valueOf(updatedRequestStatus.getStatus().toString()));
+                requestRepository.save(request);
                 hasEventAvailableSlots(event);
             }
         }
 
         EventRequestStatusUpdateResult result = new EventRequestStatusUpdateResult();
 
+        List<Request> updatedRequests = requestRepository.getAllRequestsByIds(updatedRequestStatus
+                .getRequestIds());
         List<ParticipationRequestDto> confirmedRequests = new ArrayList<>();
         List<ParticipationRequestDto> rejectedRequests = new ArrayList<>();
 
-        for (Long requestId : updatedRequestStatus.getRequestIds()) {
-            Request request = requestRepository.getReferenceById(requestId);
-
+        for (Request request : updatedRequests) {
             if (request.getStatus().equals(RequestStatus.CONFIRMED)) {
                 confirmedRequests.add(RequestMapper.toParticipationRequestDto(request));
             }
@@ -165,12 +162,25 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public Integer getConfirmedRequestsByEventId(Long eventId) {
+    public Long getConfirmedRequestsByEventId(Long eventId) {
         eventService.checkIfEventExists(eventId);
 
         Optional<List<Request>> requests = requestRepository.getConfirmedRequestsByEventId(eventId);
 
-        return requests.map(List::size).orElse(0);
+        if (requests.isPresent()) {
+            return (long) requests.get().size();
+        }
+
+        return 0L;
+    }
+
+    @Override
+    public Map<Long, Long> getConfirmedRequestsByEventsList(List<Long> eventsIds) {
+        List<ConfirmedRequestsDto> confirmedRequestsDtos = requestRepository
+                .getConfirmedRequestsByEventsIds(eventsIds);
+        return confirmedRequestsDtos.stream()
+                .collect(Collectors.toMap(ConfirmedRequestsDto::getEventId,
+                        ConfirmedRequestsDto::getConfirmedRequests));
     }
 
     private void checkIfRequestExists(Long requestId) {

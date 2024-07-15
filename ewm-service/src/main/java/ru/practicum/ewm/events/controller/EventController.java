@@ -12,6 +12,8 @@ import ru.practicum.ewm.events.service.EventService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,8 +26,8 @@ public class EventController {
 
     @GetMapping("/users/{userId}/events")
     public List<EventShortDto> getUsersEvents(@PathVariable Long userId,
-                                              @RequestParam(required = false, defaultValue = "0") Integer from,
-                                              @RequestParam(required = false, defaultValue = "10") Integer size) {
+                                              @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                              @RequestParam(defaultValue = "10") @Positive Integer size) {
         log.info("Getting events added by user id={}, page starts from={}, size={}", userId, from, size);
 
         return eventService.getUsersEvents(userId, from, size);
@@ -64,8 +66,8 @@ public class EventController {
                                                     @RequestParam(required = false)
                                                         @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
                                                         LocalDateTime rangeEnd,
-                                                    @RequestParam(required = false, defaultValue = "0") Integer from,
-                                                    @RequestParam(required = false, defaultValue = "10") Integer size) {
+                                                    @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                                    @RequestParam(defaultValue = "10") @Positive Integer size) {
         log.info("Getting events by admin by conditions: users={}, states={}, categories={}, rangeStart={}, " +
                 "rangeEnd={}, page starts from={}, size={}", users, states, categories, rangeStart, rangeEnd,
                 from, size);
@@ -91,8 +93,8 @@ public class EventController {
                                              @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
                                          @RequestParam(defaultValue = "false") Boolean onlyAvailable,
                                          @RequestParam(defaultValue = "VIEWS") SortType sort,
-                                         @RequestParam(required = false, defaultValue = "0") Integer from,
-                                         @RequestParam(required = false, defaultValue = "10") Integer size,
+                                         @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                         @RequestParam(defaultValue = "10") @Positive Integer size,
                                          HttpServletRequest request) {
         log.info("Getting events by conditions: text={}, categories={}, paid={}, rangeStart={}, rangeEnd={}, " +
                         "onlyAvailable={}, sort={}, page starts from={}, size={}, client ip: {}, endpoint path: {}",

@@ -11,6 +11,8 @@ import ru.practicum.ewm.compilations.dto.UpdateCompilationRequest;
 import ru.practicum.ewm.compilations.service.CompilationService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -22,8 +24,8 @@ public class CompilationController {
 
     @GetMapping("/compilations")
     public List<CompilationDto> getCompilations(@RequestParam(required = false) Boolean pinned,
-                                                @RequestParam(required = false, defaultValue = "0") Integer from,
-                                                @RequestParam(required = false, defaultValue = "10") Integer size) {
+                                                @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                                @RequestParam(defaultValue = "10") @Positive Integer size) {
         log.info("Getting event compilations: pinned={}, page starts from={}, size={}", pinned, from, size);
 
         return compilationService.getCompilations(pinned, from, size);

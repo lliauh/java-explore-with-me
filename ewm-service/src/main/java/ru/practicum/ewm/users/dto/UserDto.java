@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Data
@@ -13,10 +15,12 @@ import javax.validation.constraints.Size;
 public class UserDto {
     private Long id;
 
+    @NotBlank
     @Size(min = 2, message = "Name length cannot be less than 2 symbols.")
     @Size(max = 250, message = "Name length cannot be greater than 250 symbols.")
     private String name;
 
+    @NotNull
     @Email
     @Size(min = 6, message = "Email length cannot be less than 6 symbols.")
     @Size(max = 254, message = "Email length cannot be greater than 254 symbols.")

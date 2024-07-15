@@ -35,5 +35,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                                 @Param("paid") Boolean paid, @Param("rangeStart") LocalDateTime rangeStart,
                                 @Param("rangeEnd") LocalDateTime rangeEnd, Pageable pageable);
 
+    @Query("select e from Event e where e.id in (:eventsIds)")
+    List<Event> getEventsByEventsIds(@Param("eventsIds") List<Long> eventIds);
+
 
 }

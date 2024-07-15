@@ -9,6 +9,8 @@ import ru.practicum.ewm.users.dto.UserDto;
 import ru.practicum.ewm.users.service.UserService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -21,10 +23,8 @@ public class UserController {
 
     @GetMapping
     public List<UserDto> getAllUsers(@RequestParam(required = false) Long[] ids,
-                                     @RequestParam(required = false, defaultValue = "0")
-                                         Integer from,
-                                     @RequestParam(required = false, defaultValue = "10")
-                                         Integer size) {
+                                     @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                     @RequestParam(defaultValue = "10") @Positive Integer size) {
         log.info("Getting all users, page starts from={}, size={}, ids={}", from, size, ids);
 
         return userService.getAllUsers(ids, from, size);
