@@ -3,6 +3,7 @@ package ru.practicum.ewm.requests.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.events.model.Event;
 import ru.practicum.ewm.events.model.EventState;
 import ru.practicum.ewm.events.repository.EventRepository;
@@ -12,15 +13,13 @@ import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.requests.dto.*;
 import ru.practicum.ewm.requests.model.Request;
 import ru.practicum.ewm.requests.model.RequestStatus;
+import ru.practicum.ewm.requests.model.RequestStatusUpdate;
 import ru.practicum.ewm.requests.repository.RequestRepository;
 import ru.practicum.ewm.users.repository.UserRepository;
 import ru.practicum.ewm.users.service.UserService;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -114,6 +113,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional
     public EventRequestStatusUpdateResult updateRequests(Long userId, Long eventId,
                                                          EventRequestStatusUpdateRequest updatedRequestStatus) {
         userService.checkIfUserExists(userId);
@@ -124,41 +124,42 @@ public class RequestServiceImpl implements RequestService {
         List<Request> requestsToStatusChange = requestRepository.getAllRequestsByIds(updatedRequestStatus
                 .getRequestIds());
 
+        Set<Long> foundRequestsIds = requestsToStatusChange.stream()
+                .map(Request::getId)
+                .collect(Collectors.toSet());
+
+        for (Long requestId : updatedRequestStatus.getRequestIds()) {
+            if (!foundRequestsIds.contains(requestId)) {
+                throw new NotFoundException(String.format("Request with id=%d was not found", requestId));
+            }
+        }
+
+        Long confirmedRequestsCount = getConfirmedRequestsByEventId(eventId);
+
+        List<ParticipationRequestDto> confirmedRequests = new ArrayList<>();
+        List<ParticipationRequestDto> rejectedRequests = new ArrayList<>();
+
         for (Request request : requestsToStatusChange) {
             if (!request.getStatus().equals(RequestStatus.PENDING)) {
                 throw new ActionValidationException("Only requests with status PENDING can be moderated");
             }
 
-            if (!hasEventAvailableSlots(event)) {
+            if (confirmedRequestsCount.equals(event.getParticipantLimit())) {
                 throw new ActionValidationException("Participant limit was reached");
-            } else {
-                request.setStatus(RequestStatus.valueOf(updatedRequestStatus.getStatus().toString()));
-                requestRepository.save(request);
-                hasEventAvailableSlots(event);
             }
-        }
 
-        EventRequestStatusUpdateResult result = new EventRequestStatusUpdateResult();
-
-        List<Request> updatedRequests = requestRepository.getAllRequestsByIds(updatedRequestStatus
-                .getRequestIds());
-        List<ParticipationRequestDto> confirmedRequests = new ArrayList<>();
-        List<ParticipationRequestDto> rejectedRequests = new ArrayList<>();
-
-        for (Request request : updatedRequests) {
-            if (request.getStatus().equals(RequestStatus.CONFIRMED)) {
+            if (updatedRequestStatus.getStatus().equals(RequestStatusUpdate.CONFIRMED) &&
+                    (event.getParticipantLimit() == 0 || confirmedRequestsCount < event.getParticipantLimit())) {
+                request.setStatus(RequestStatus.CONFIRMED);
+                confirmedRequestsCount++;
                 confirmedRequests.add(RequestMapper.toParticipationRequestDto(request));
-            }
-
-            if (request.getStatus().equals(RequestStatus.REJECTED)) {
+            } else {
+                request.setStatus(RequestStatus.REJECTED);
                 rejectedRequests.add(RequestMapper.toParticipationRequestDto(request));
             }
         }
 
-        result.setConfirmedRequests(confirmedRequests);
-        result.setRejectedRequests(rejectedRequests);
-
-        return result;
+        return new EventRequestStatusUpdateResult(confirmedRequests, rejectedRequests);
     }
 
     @Override
@@ -167,11 +168,7 @@ public class RequestServiceImpl implements RequestService {
 
         Optional<List<Request>> requests = requestRepository.getConfirmedRequestsByEventId(eventId);
 
-        if (requests.isPresent()) {
-            return (long) requests.get().size();
-        }
-
-        return 0L;
+        return requests.map(requestList -> (long) requestList.size()).orElse(0L);
     }
 
     @Override
@@ -187,19 +184,5 @@ public class RequestServiceImpl implements RequestService {
         if (!requestRepository.existsById(requestId)) {
             throw new NotFoundException(String.format("Request with id=%d was not found", requestId));
         }
-    }
-
-    private Boolean hasEventAvailableSlots(Event event) {
-        if (event.getParticipantLimit().equals(getConfirmedRequestsByEventId(event.getId()))) {
-            List<Request> pendingRequests = requestRepository.getPendingRequestsByEventId(event.getId());
-            for (Request request : pendingRequests) {
-                request.setStatus(RequestStatus.REJECTED);
-                requestRepository.save(request);
-            }
-
-            return false;
-        }
-
-        return true;
     }
 }

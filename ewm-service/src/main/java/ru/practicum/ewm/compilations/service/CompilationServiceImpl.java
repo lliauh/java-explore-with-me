@@ -13,19 +13,18 @@ import ru.practicum.ewm.events.dto.EventMapper;
 import ru.practicum.ewm.events.dto.EventShortDto;
 import ru.practicum.ewm.events.model.Event;
 import ru.practicum.ewm.events.repository.EventRepository;
-import ru.practicum.ewm.events.service.EventService;
 import ru.practicum.ewm.exception.NotFoundException;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CompilationServiceImpl implements CompilationService {
     private final CompilationRepository compilationRepository;
-    private final EventService eventService;
     private final EventRepository eventRepository;
 
     @Override
@@ -61,12 +60,7 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation compilation = CompilationMapper.toCompilation(newCompilation);
 
         if (newCompilation.getEvents() != null) {
-            Set<Event> eventsSet = new HashSet<>();
-
-            for (Long eventId : newCompilation.getEvents()) {
-                eventService.checkIfEventExists(eventId);
-                eventsSet.add(eventRepository.getReferenceById(eventId));
-            }
+            Set<Event> eventsSet = getEventsFromDto(newCompilation.getEvents());
 
             compilation.setEvents(eventsSet);
         }
@@ -93,7 +87,7 @@ public class CompilationServiceImpl implements CompilationService {
 
         Compilation compilation = compilationRepository.getReferenceById(compId);
 
-        if (updatedCompilation.getTitle() != null) {
+        if (updatedCompilation.getTitle() != null && !updatedCompilation.getTitle().isBlank()) {
             compilation.setTitle(updatedCompilation.getTitle());
         }
 
@@ -102,12 +96,7 @@ public class CompilationServiceImpl implements CompilationService {
         }
 
         if (updatedCompilation.getEvents() != null) {
-            Set<Event> eventsSet = new HashSet<>();
-
-            for (Long eventId : updatedCompilation.getEvents()) {
-                eventService.checkIfEventExists(eventId);
-                eventsSet.add(eventRepository.getReferenceById(eventId));
-            }
+            Set<Event> eventsSet = getEventsFromDto(updatedCompilation.getEvents());
 
             compilation.setEvents(eventsSet);
         }
@@ -132,5 +121,22 @@ public class CompilationServiceImpl implements CompilationService {
             eventShortDtoSet.add(EventMapper.toEventShortDto(event));
         }
         compilationDto.setEvents(eventShortDtoSet);
+    }
+
+    private Set<Event> getEventsFromDto(Set<Long> eventsSet) {
+        List<Event> foundEventsList = eventRepository.getEventsByEventsIds(
+                new ArrayList<>(eventsSet));
+
+        Set<Long> foundEventsIds = foundEventsList.stream()
+                .map(Event::getId)
+                .collect(Collectors.toSet());
+
+        for (Long eventId : eventsSet) {
+            if (!foundEventsIds.contains(eventId)) {
+                throw new NotFoundException(String.format("Event with id=%d was not found", eventId));
+            }
+        }
+
+        return new HashSet<>(foundEventsList);
     }
 }

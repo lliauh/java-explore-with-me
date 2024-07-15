@@ -7,7 +7,6 @@ import ru.practicum.ewm.categories.dto.CategoryDto;
 import ru.practicum.ewm.categories.dto.CategoryMapper;
 import ru.practicum.ewm.categories.model.Category;
 import ru.practicum.ewm.categories.repository.CategoryRepository;
-import ru.practicum.ewm.events.repository.EventRepository;
 import ru.practicum.ewm.exception.NotFoundException;
 
 import java.util.List;
@@ -17,7 +16,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
-    private final EventRepository eventRepository;
 
     @Override
     public CategoryDto create(CategoryDto categoryDto) {
