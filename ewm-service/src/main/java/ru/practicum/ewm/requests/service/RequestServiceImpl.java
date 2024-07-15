@@ -144,7 +144,7 @@ public class RequestServiceImpl implements RequestService {
                 throw new ActionValidationException("Only requests with status PENDING can be moderated");
             }
 
-            if (confirmedRequestsCount.equals(event.getParticipantLimit())) {
+            if (event.getParticipantLimit() != 0 && confirmedRequestsCount.equals(event.getParticipantLimit())) {
                 throw new ActionValidationException("Participant limit was reached");
             }
 
