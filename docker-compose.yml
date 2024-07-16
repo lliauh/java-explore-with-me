@@ -5,7 +5,7 @@ services:
     image: postgres:14-alpine
     container_name: postgres_explorewithme_stats_container
     ports:
-      - "5433:5433"
+      - "6571:5432"
     volumes:
       - /var/lib/postgresql/data/
     environment:
@@ -26,13 +26,12 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
       - DB_HOST=stats-db
-      - DB_PORT=5433
 
   ewm-db:
     image: postgres:14-alpine
     container_name: postgres_explorewithme_service_container
     ports:
-      - "5434:5434"
+      - "6572:5432"
     volumes:
       - /var/lib/postgresql/data/
     environment:
@@ -53,4 +52,3 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
       - DB_HOST=ewm-db
-      - DB_PORT=5434

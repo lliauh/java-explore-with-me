@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.stats.dto.HitDto;
 import ru.practicum.stats.dto.StatsDto;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@Validated
 @Slf4j
 public class StatsController {
     private final StatsService statsService;
@@ -32,7 +34,7 @@ public class StatsController {
     public List<StatsDto> getStats(@RequestParam("start") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startDate,
                                    @RequestParam("end") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endDate,
                                    @RequestParam(required = false) String[] uris,
-                                   @RequestParam(required = false, defaultValue = "false") Boolean unique) {
+                                   @RequestParam(defaultValue = "false") Boolean unique) {
         log.info("Getting stats for uris={}; from={}; to={}; unique = {}", uris, startDate, endDate, unique);
 
         if (startDate.isAfter(endDate)) {

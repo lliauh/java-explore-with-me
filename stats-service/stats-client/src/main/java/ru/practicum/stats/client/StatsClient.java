@@ -3,11 +3,13 @@ package ru.practicum.stats.client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.stats.dto.HitDto;
+import ru.practicum.stats.dto.StatsDto;
+
+import java.util.List;
 
 @Service
 public class StatsClient extends BaseClient {
@@ -22,11 +24,11 @@ public class StatsClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> saveHit(HitDto hitDto) {
+    public HitDto saveHit(HitDto hitDto) {
         return post("/hit", hitDto);
     }
 
-    public ResponseEntity<Object> getStats(String start, String end, String[] uris, Boolean unique) {
+    public List<StatsDto> getStats(String start, String end, String[] uris, Boolean unique) {
         String pathFirstPart = "/stats?start=" + start + "&end=" + end;
         String finalPath;
 

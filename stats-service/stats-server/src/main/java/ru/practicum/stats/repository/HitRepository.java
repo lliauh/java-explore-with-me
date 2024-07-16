@@ -35,4 +35,5 @@ public interface HitRepository extends JpaRepository<Hit, Long> {
             "where h.timestamp between :start and :end " +
             "group by h.app, h.uri order by count(distinct h.ip)")
     List<StatsDto> getAllStatsUnique(@Param("start") LocalDateTime startDate, @Param("end") LocalDateTime endDate);
+
 }

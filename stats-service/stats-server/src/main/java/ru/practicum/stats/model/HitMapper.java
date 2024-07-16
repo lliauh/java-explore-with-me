@@ -1,13 +1,30 @@
 package ru.practicum.stats.model;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import ru.practicum.stats.dto.HitDto;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class HitMapper {
     public static Hit toHit(HitDto hitDto) {
-        return new Hit(hitDto.getId(), hitDto.getApp(), hitDto.getUri(), hitDto.getIp(), hitDto.getTimestamp());
+        Hit hit = new Hit();
+        hit.setId(hitDto.getId());
+        hit.setApp(hitDto.getApp());
+        hit.setUri(hitDto.getUri());
+        hit.setIp(hitDto.getIp());
+        hit.setTimestamp(hitDto.getTimestamp());
+
+        return hit;
     }
 
     public static HitDto toHitDto(Hit hit) {
-        return new HitDto(hit.getId(), hit.getApp(), hit.getUri(), hit.getIp(), hit.getTimestamp());
+        HitDto hitDto = new HitDto();
+        hitDto.setId(hit.getId());
+        hitDto.setApp(hit.getApp());
+        hitDto.setUri(hit.getUri());
+        hitDto.setIp(hit.getIp());
+        hitDto.setTimestamp(hit.getTimestamp());
+
+        return hitDto;
     }
 }
