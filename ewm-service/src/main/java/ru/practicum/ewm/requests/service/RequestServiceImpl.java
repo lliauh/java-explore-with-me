@@ -144,12 +144,12 @@ public class RequestServiceImpl implements RequestService {
                 throw new ActionValidationException("Only requests with status PENDING can be moderated");
             }
 
-            if (event.getParticipantLimit() != 0 && confirmedRequestsCount.equals(event.getParticipantLimit())) {
+            if (confirmedRequestsCount.equals(event.getParticipantLimit())) {
                 throw new ActionValidationException("Participant limit was reached");
             }
 
             if (updatedRequestStatus.getStatus().equals(RequestStatusUpdate.CONFIRMED) &&
-                    (event.getParticipantLimit() == 0 || confirmedRequestsCount < event.getParticipantLimit())) {
+                    confirmedRequestsCount < event.getParticipantLimit()) {
                 request.setStatus(RequestStatus.CONFIRMED);
                 confirmedRequestsCount++;
                 confirmedRequests.add(RequestMapper.toParticipationRequestDto(request));

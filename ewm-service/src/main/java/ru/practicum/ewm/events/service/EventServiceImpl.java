@@ -52,10 +52,10 @@ public class EventServiceImpl implements EventService {
         List<EventShortDto> foundEvents = eventRepository.getAllUserEvents(userId, pageRequest).stream()
                 .map(EventMapper::toEventShortDto)
                 .collect(Collectors.toList());
-
         List<Long> foundEventsIds = foundEvents.stream()
                 .map(EventShortDto::getId)
                 .collect(Collectors.toList());
+
         Map<Long, Long> confirmedRequestsMap = requestService.getConfirmedRequestsByEventsList(foundEventsIds);
         Map<Long, Long> eventsViews = getViewsByEventsIds(foundEventsIds);
 
@@ -245,10 +245,10 @@ public class EventServiceImpl implements EventService {
 
         List<Event> foundEvents = eventRepository.getEventsByUser(text, categories, paid, rangeStart, rangeEnd,
                 pageRequest);
-
         List<Long> foundEventsIds = foundEvents.stream()
                 .map(Event::getId)
                 .collect(Collectors.toList());
+
         Map<Long, Long> confirmedRequestsMap = requestService.getConfirmedRequestsByEventsList(foundEventsIds);
         Map<Long, Long> eventsViews = getViewsByEventsIds(foundEventsIds);
 
