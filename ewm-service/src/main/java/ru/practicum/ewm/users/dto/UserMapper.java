@@ -1,10 +1,7 @@
 package ru.practicum.ewm.users.dto;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import ru.practicum.ewm.users.model.User;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserMapper {
     public static UserDto toUserDto(User user) {
         return new UserDto(user.getId(), user.getName(), user.getEmail());

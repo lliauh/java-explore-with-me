@@ -1,12 +1,9 @@
 package ru.practicum.ewm.reviews.dto;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import ru.practicum.ewm.events.dto.EventMapper;
 import ru.practicum.ewm.reviews.model.Review;
 import ru.practicum.ewm.users.dto.UserMapper;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ReviewMapper {
     public static ReviewToUserDto toReviewToUserDto(Review review) {
         ReviewToUserDto reviewToUserDto = new ReviewToUserDto();

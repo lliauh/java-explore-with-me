@@ -1,12 +1,9 @@
 package ru.practicum.ewm.events.dto;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import ru.practicum.ewm.categories.dto.CategoryMapper;
 import ru.practicum.ewm.events.model.Event;
 import ru.practicum.ewm.users.dto.UserMapper;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class EventMapper {
 
     public static EventShortDto toEventShortDto(Event event) {

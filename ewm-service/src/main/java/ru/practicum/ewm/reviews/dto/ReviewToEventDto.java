@@ -10,5 +10,5 @@ import ru.practicum.ewm.users.dto.UserShortDto;
 @AllArgsConstructor
 public class ReviewToEventDto {
     private Boolean isLike;
-    public UserShortDto reviewer;
+    private UserShortDto reviewer;
 }

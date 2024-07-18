@@ -451,8 +451,6 @@ public class EventServiceImpl implements EventService {
                 } else {
                     ratingMap.put(eventId, 0);
                 }
-            } else {
-                ratingMap.put(eventId, null);
             }
         }
 

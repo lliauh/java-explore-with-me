@@ -12,5 +12,5 @@ import ru.practicum.ewm.users.dto.UserShortDto;
 public class ReviewDto {
     private Boolean isLike;
     private EventShortToReviewDto event;
-    public UserShortDto reviewer;
+    private UserShortDto reviewer;
 }

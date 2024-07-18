@@ -1,10 +1,7 @@
 package ru.practicum.ewm.compilations.dto;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import ru.practicum.ewm.compilations.model.Compilation;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CompilationMapper {
     public static Compilation toCompilation(NewCompilationDto newCompilation) {
         Compilation compilation = new Compilation();

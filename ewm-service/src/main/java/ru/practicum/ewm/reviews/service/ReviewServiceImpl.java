@@ -107,7 +107,7 @@ public class ReviewServiceImpl implements ReviewService {
     private void checkIfEventCanBeReviewedByUser(Long eventId, Long userId) {
         Event event = eventRepository.getReferenceById(eventId);
 
-        if (!event.getState().equals(EventState.PUBLISHED) || event.getEventDate().isAfter(LocalDateTime.now())) {
+        if (!(event.getState() == EventState.PUBLISHED) || event.getEventDate().isAfter(LocalDateTime.now())) {
             throw new ActionValidationException(String.format("Event with id=%d cannot be reviewed", eventId));
         }
 
@@ -121,7 +121,7 @@ public class ReviewServiceImpl implements ReviewService {
     private void checkIfEventWasPublishedAndHasPassed(Long eventId) {
         Event event = eventRepository.getReferenceById(eventId);
 
-        if (!event.getState().equals(EventState.PUBLISHED) || event.getEventDate().isAfter(LocalDateTime.now())) {
+        if (!(event.getState() == EventState.PUBLISHED) || event.getEventDate().isAfter(LocalDateTime.now())) {
             throw new ActionValidationException(String.format("Event with id=%d cannot have any reviews, because it " +
                     "wasn't published or hasn't passed yet", eventId));
         }
