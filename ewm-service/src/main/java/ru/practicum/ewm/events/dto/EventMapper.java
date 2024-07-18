@@ -78,4 +78,16 @@ public class EventMapper {
 
         return eventFullDto;
     }
+
+    public static EventShortToReviewDto toEventShortToReviewDto(Event event) {
+        EventShortToReviewDto eventShortToReviewDto = new EventShortToReviewDto();
+
+        eventShortToReviewDto.setAnnotation(event.getAnnotation());
+        eventShortToReviewDto.setCategory(CategoryMapper.toCategoryDto(event.getCategory()));
+        eventShortToReviewDto.setEventDate(event.getEventDate());
+        eventShortToReviewDto.setId(event.getId());
+        eventShortToReviewDto.setTitle(event.getTitle());
+
+        return eventShortToReviewDto;
+    }
 }
