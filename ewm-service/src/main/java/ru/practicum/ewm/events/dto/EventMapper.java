@@ -1,12 +1,9 @@
 package ru.practicum.ewm.events.dto;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import ru.practicum.ewm.categories.dto.CategoryMapper;
 import ru.practicum.ewm.events.model.Event;
 import ru.practicum.ewm.users.dto.UserMapper;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class EventMapper {
 
     public static EventShortDto toEventShortDto(Event event) {
@@ -77,5 +74,17 @@ public class EventMapper {
         eventFullDto.setTitle(event.getTitle());
 
         return eventFullDto;
+    }
+
+    public static EventShortToReviewDto toEventShortToReviewDto(Event event) {
+        EventShortToReviewDto eventShortToReviewDto = new EventShortToReviewDto();
+
+        eventShortToReviewDto.setAnnotation(event.getAnnotation());
+        eventShortToReviewDto.setCategory(CategoryMapper.toCategoryDto(event.getCategory()));
+        eventShortToReviewDto.setEventDate(event.getEventDate());
+        eventShortToReviewDto.setId(event.getId());
+        eventShortToReviewDto.setTitle(event.getTitle());
+
+        return eventShortToReviewDto;
     }
 }

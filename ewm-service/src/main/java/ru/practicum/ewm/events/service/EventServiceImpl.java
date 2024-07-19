@@ -16,6 +16,9 @@ import ru.practicum.ewm.exception.DateValidationException;
 import ru.practicum.ewm.exception.EventInitiatorValidationException;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.requests.service.RequestService;
+import ru.practicum.ewm.reviews.dto.CountLikesByEventDto;
+import ru.practicum.ewm.reviews.dto.CountReviewsByEventDto;
+import ru.practicum.ewm.reviews.repository.ReviewRepository;
 import ru.practicum.ewm.users.repository.UserRepository;
 import ru.practicum.ewm.users.service.UserService;
 import ru.practicum.stats.client.StatsClient;
@@ -37,6 +40,7 @@ public class EventServiceImpl implements EventService {
     private final RequestService requestService;
     private final CategoryService categoryService;
     private final CategoryRepository categoryRepository;
+    private final ReviewRepository reviewRepository;
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -58,6 +62,7 @@ public class EventServiceImpl implements EventService {
 
         Map<Long, Long> confirmedRequestsMap = requestService.getConfirmedRequestsByEventsList(foundEventsIds);
         Map<Long, Long> eventsViews = getViewsByEventsIds(foundEventsIds);
+        Map<Long, Integer> ratingMap = getRatingByEventIds(foundEventsIds);
 
 
         for (EventShortDto event : foundEvents) {
@@ -71,6 +76,10 @@ public class EventServiceImpl implements EventService {
                 event.setConfirmedRequests(confirmedRequestsMap.get(event.getId()));
             } else {
                 event.setConfirmedRequests(0L);
+            }
+
+            if (ratingMap.containsKey(event.getId())) {
+                event.setRating(ratingMap.get(event.getId()));
             }
         }
 
@@ -108,6 +117,14 @@ public class EventServiceImpl implements EventService {
 
         EventFullDto result = EventMapper.toEventFullDto(event);
         result.setViews(getViewsByEventId(eventId));
+
+        Map<Long, Long> confirmedRequestsMap = requestService.getConfirmedRequestsByEventsList(List.of(eventId));
+        if (confirmedRequestsMap != null && confirmedRequestsMap.containsKey(event.getId())) {
+            result.setConfirmedRequests(confirmedRequestsMap.get(event.getId()));
+        }
+
+        Map<Long, Integer> ratingMap = getRatingByEventIds(List.of(eventId));
+        result.setRating(ratingMap.get(eventId));
 
         return result;
     }
@@ -164,6 +181,7 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toList());
         Map<Long, Long> confirmedRequestsMap = requestService.getConfirmedRequestsByEventsList(foundEventsIds);
         Map<Long, Long> eventsViews = getViewsByEventsIds(foundEventsIds);
+        Map<Long, Integer> ratingMap = getRatingByEventIds(foundEventsIds);
 
         List<EventFullDto> result = new ArrayList<>();
         for (Event event : foundEvents) {
@@ -179,6 +197,10 @@ public class EventServiceImpl implements EventService {
                 eventFullDto.setConfirmedRequests(confirmedRequestsMap.get(event.getId()));
             } else {
                 eventFullDto.setConfirmedRequests(0L);
+            }
+
+            if (ratingMap.containsKey(event.getId())) {
+                eventFullDto.setRating(ratingMap.get(event.getId()));
             }
 
             result.add(eventFullDto);
@@ -251,6 +273,7 @@ public class EventServiceImpl implements EventService {
 
         Map<Long, Long> confirmedRequestsMap = requestService.getConfirmedRequestsByEventsList(foundEventsIds);
         Map<Long, Long> eventsViews = getViewsByEventsIds(foundEventsIds);
+        Map<Long, Integer> ratingMap = getRatingByEventIds(foundEventsIds);
 
         List<EventShortDto> result = new ArrayList<>();
 
@@ -273,6 +296,10 @@ public class EventServiceImpl implements EventService {
                         eventShortDto.setConfirmedRequests(0L);
                     }
 
+                    if (ratingMap.containsKey(event.getId())) {
+                        eventShortDto.setRating(ratingMap.get(event.getId()));
+                    }
+
                     result.add(eventShortDto);
                 }
             }
@@ -292,6 +319,10 @@ public class EventServiceImpl implements EventService {
                     eventShortDto.setConfirmedRequests(0L);
                 }
 
+                if (ratingMap.containsKey(event.getId())) {
+                    eventShortDto.setRating(ratingMap.get(event.getId()));
+                }
+
                 result.add(eventShortDto);
             }
         }
@@ -300,6 +331,9 @@ public class EventServiceImpl implements EventService {
             result.sort(Collections.reverseOrder(Comparator.comparing(EventShortDto::getViews)));
         } else if (sort.equals(SortType.EVENT_DATE)) {
             result.sort(Collections.reverseOrder(Comparator.comparing(EventShortDto::getEventDate)));
+        } else if (sort.equals(SortType.RATING)) {
+            result.sort(Collections.reverseOrder(Comparator.comparing(EventShortDto::getRating,
+                    Comparator.nullsFirst(Comparator.naturalOrder()))));
         }
 
         return result;
@@ -317,6 +351,9 @@ public class EventServiceImpl implements EventService {
 
         result.setConfirmedRequests(requestService.getConfirmedRequestsByEventId(eventId));
         result.setViews(getViewsByEventId(eventId));
+
+        Map<Long, Integer> ratingMap = getRatingByEventIds(List.of(eventId));
+        result.setRating(ratingMap.get(eventId));
 
         return result;
     }
@@ -392,6 +429,32 @@ public class EventServiceImpl implements EventService {
         }
 
         return eventsViews;
+    }
+
+    private Map<Long, Integer> getRatingByEventIds(List<Long> eventIds) {
+        List<CountReviewsByEventDto> reviewsCount = reviewRepository.getReviewsByEvents(eventIds);
+        Map<Long, Long> reviewsCountMap = reviewsCount.stream()
+                .collect(Collectors.toMap(CountReviewsByEventDto::getEventId, CountReviewsByEventDto::getReviewsCount));
+
+        List<CountLikesByEventDto> likesCount = reviewRepository.getLikesByEvents(eventIds);
+        Map<Long, Long> likesCountMap = likesCount.stream()
+                .collect(Collectors.toMap(CountLikesByEventDto::getEventId, CountLikesByEventDto::getLikesCount));
+
+        Map<Long, Integer> ratingMap = new HashMap<>();
+
+        for (Long eventId : eventIds) {
+            if (reviewsCountMap.containsKey(eventId)) {
+                if (likesCountMap.containsKey(eventId)) {
+                    Integer eventRating = (int) ((float) likesCountMap.get(eventId) / reviewsCountMap.get(eventId)
+                            * 100);
+                    ratingMap.put(eventId, eventRating);
+                } else {
+                    ratingMap.put(eventId, 0);
+                }
+            }
+        }
+
+        return ratingMap;
     }
 
     private void checkIfEventDateIsValid(LocalDateTime eventDate) {
